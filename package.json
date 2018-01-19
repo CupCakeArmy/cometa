@@ -1,0 +1,18 @@
+{
+  "name": "template",
+  "version": "1.0.0",
+  "description": "Templating Engine",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Templating",
+    "Engine"
+  ],
+  "author": "Niccolo Borgioli",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^9.3.0"
+  }
+}
