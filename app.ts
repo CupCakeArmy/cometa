@@ -5,7 +5,6 @@ import * as parser from './parser'
 import { Render, LOG_TYPE, options } from './options'
 import { replaceVars, addParts } from './parser';
 
-
 const cache: Map<string, Render> = new Map()
 
 function logger(type: LOG_TYPE, msg: object | string): void {
@@ -30,6 +29,7 @@ function logger(type: LOG_TYPE, msg: object | string): void {
 }
 
 async function compile(html: string): Promise<Render> {
+	html = await parser.insertImports(html)
 	html = parser.removeComments(html)
 
 	const compiled = replaceVars(html)
@@ -44,10 +44,10 @@ async function compile(html: string): Promise<Render> {
 }
 
 async function render(template_name: string, data?: any): Promise<string | undefined> {
-	const compiled_path = path.join(options.compiled_dir, template_name) + `.${options.compiled_dir}`
+	const compiled_path = path.join(options.compiled_dir, `${template_name}.${options.compiled_ext}`)
 
 	if (!options.caching || !await util.exists(compiled_path)) {
-		const template_path = path.join(options.template_dir, template_name) + `.${options.template_ext}`
+		const template_path = path.join(options.template_dir, `${template_name}.${options.template_ext}`)
 
 		const html = await util.readFile(template_path)
 		if (html === undefined) {
@@ -73,7 +73,7 @@ async function go() {
 			p: [
 				'omg',
 				{
-					check: 'let go'
+					check: 'let goo'
 				}
 			]
 		},
