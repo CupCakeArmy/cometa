@@ -25,6 +25,7 @@ interface Options {
 	template_ext: string
 	compiled_dir: string
 	compiled_ext: string
+	max_recursion: number
 }
 
 export const options: Options = {
@@ -34,6 +35,7 @@ export const options: Options = {
 	template_ext: 'html',
 	compiled_dir: './views',
 	compiled_ext: 'htmlbin',
+	max_recursion: 100,
 }
 
 interface Expressions {
