@@ -1,19 +1,50 @@
 import { re, error } from "./options";
+import { readFile } from "./util";
+import * as path from 'path'
+import { options } from './options'
 
 function getFromData(data: any, name: string): string {
-	let ret: any = data
-	for (let i of name.trim().split('.')) {
-		const array = i.match(/\[\w+\]/)
-		if (array === null)
-			ret = ret[i]
-		else {
-			const index: string = array[0].slice(1, -1)
-			const num_index: number = parseInt(index[0])
-			ret = ret[i.substr(0, array.index)]
-			ret = num_index === NaN ? ret[index] : ret[num_index]
+
+	name = name.trim()
+
+	// If not matches the valid pattern of a getter, return empty string
+	const valid: boolean = /^[A-z]\w*(\.[A-z]\w*|\[\d+\]|\[('|")\w+\2\]|\[[A-z]\w*\])*$/.test(name)
+	if (!valid)
+		return ''
+
+	name = name.replace(/('|")/g, '')
+	name = name.replace(/\[(\w+)\]/g, '.$1')
+
+	for (const i of name.split('.'))
+		data = data[i]
+
+	return String(data)
+}
+
+function replaceBetween(start: number, end: number, str: string, replace: string): string {
+	return str.substring(0, start) + replace + str.substring(end)
+}
+
+export async function insertImports(html: string, depth = 0): Promise<string> {
+	if (depth > options.max_recursion)
+		throw new Error('Maximal recursion in include statement')
+
+	const begin = re.begin + re.incude
+	const ending = re.ending
+
+	const exp = new RegExp(`${begin}.*?${ending}`, 'g')
+
+	const includes = html.match(exp)
+	if (includes !== null)
+		for (const i of includes) {
+			const template_name = i.slice(begin.length, -ending.length).trim()
+			const file = await readFile(path.join(options.template_dir, `${template_name}.${options.template_ext}`))
+			const render = await insertImports(file, ++depth)
+			html = html.replace(i, render)
 		}
-	}
-	return ret
+
+	return html
+
 }
 
 export function addParts(data: any, parts: (((data: any) => string) | string)[]): string {
@@ -31,9 +62,12 @@ export function removeComments(html: string): string {
 
 export function replaceVars(html: string): (((data: any) => string) | string)[] {
 
+	const begin = new RegExp(re.begin)
+	const ending = new RegExp(re.ending)
+
 	const ret: (((data: any) => string) | string)[] = []
 
-	let i = html.match(/{{/) // Starting char
+	let i = html.match(begin) // Starting char
 	while (i !== null) {
 		if (i.index === undefined)
 			throw new Error(error.parse)
@@ -44,7 +78,7 @@ export function replaceVars(html: string): (((data: any) => string) | string)[] 
 		html = html.slice(i.index + i[0].length)
 
 		// Get closing tag
-		const j = html.match(/}}/)
+		const j = html.match(ending)
 		if (j === null || j.index === undefined)
 			throw new Error(error.parse)
 
@@ -56,7 +90,7 @@ export function replaceVars(html: string): (((data: any) => string) | string)[] 
 
 		html = html.slice(j.index + j[0].length)
 
-		i = html.match(/{{/) // Starting char
+		i = html.match(begin) // Starting char
 	}
 
 	ret.push(html)
