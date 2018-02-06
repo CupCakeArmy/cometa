@@ -1,7 +1,9 @@
-import { compileBlock } from './reader'
-import { ActionFunction, re, error, options, Part } from './options'
+import { compileBlock } from './compiler'
+import { ActionFunction, re, error, options, Part, isRender } from './options'
 import { getFromObject, readFileSync } from './util'
 import { join } from 'path'
+import 'colors'
+import { computeParts } from './parser';
 
 export const comment: ActionFunction = html => {
 
@@ -100,14 +102,65 @@ export const variables: ActionFunction = html => {
 	const variable_name = html.substring(re.begin.length, end).trim()
 
 	return {
-		parts: [(data: any) => String(getFromObject(data, variable_name))],
+		parts: [(data: any) => {
+			const output = getFromObject(data, variable_name)
+			switch (typeof output) {
+				case 'object':
+					return JSON.stringify(output)
+				default:
+					return output
+			}
+		}],
 		length: end + re.ending.length
 	}
 }
 
 export const loop: ActionFunction = html => {
+
+	const rexp = {
+		start: new RegExp(`${re.begin}\\${re.for} *([A-z]\\w*?) *${re.for_in} *([A-z]\\w*?) *${re.ending}`, 'g'),
+		end: RegExp(`${re.begin} *\\${re.closing_tag} *\\${re.for} *${re.ending}`, 'g'),
+	}
+
+	// First occurence of the if statement
+	const current = {
+		found: rexp.start.exec(html),
+		variable: '',
+		arr: '',
+	}
+
+	// If there is no starting tag for an if statement return an error
+	if (current.found === null || current.found.index !== 0)
+		throw new Error(error.parse.default)
+
+	// Extract variable name from the if statemtent
+	const statement = current.found[0].slice(re.begin.length + re.if.length, -re.ending.length).trim().split(re.for_in)
+	current.variable = statement[0].trim()
+	current.arr = statement[1].trim()
+
+	let next
+	do {
+		next = {
+			start: rexp.start.exec(html),
+			end: rexp.end.exec(html),
+		}
+
+		if (next.end === null)
+			throw new Error(error.parse.default)
+
+	} while (next.start !== null && next.start.index < next.end.index)
+
+	html = html.substring(current.found[0].length, next.end.index)
+
 	return {
-		parts: [],
-		length: html.length
+		parts: [(data: any) => {
+			let ret = ''
+			for (const variable of getFromObject(data, current.arr)) {
+				const newData = Object.assign({ [current.variable]: variable }, data)
+				ret += computeParts(compileBlock(html).parts, newData)
+			}
+			return ret
+		}],
+		length: next.end.index + next.end[0].length
 	}
 }
