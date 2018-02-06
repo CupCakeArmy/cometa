@@ -1,7 +1,10 @@
 *.log
 .env
 
-/*.js
+.vscode
+
+*.js
+*.js.map
 
 node_modules/
 jspm_packages/

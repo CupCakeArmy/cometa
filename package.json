@@ -10,7 +10,7 @@
   ],
   "author": "Niccolo Borgioli",
   "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^9.3.0"
+  "dependencies": {
+    "@types/node": "^9.4.0"
   }
 }
