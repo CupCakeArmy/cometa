@@ -1,5 +1,5 @@
 import { compileBlock } from './compiler'
-import { ActionFunction, re, error, options, Part, isRender } from './options'
+import { ActionFunction, re, error, options, Part } from './options'
 import { getFromObject, readFileSync } from './util'
 import { join } from 'path'
 import 'colors'
