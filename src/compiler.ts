@@ -45,9 +45,9 @@ export const compileBlock: ActionFunction = part => {
 			case re.if:
 				func = actions.logic
 				break
-			// case re.for:
-			// 	func = actions.loop
-			// 	break
+			case re.for:
+				func = actions.loop
+				break
 			case re.incude:
 				func = actions.importer
 				break
