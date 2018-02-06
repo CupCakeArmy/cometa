@@ -64,7 +64,6 @@ export const logic: ActionFunction = html => {
 	return {
 		parts: [(data: any) => {
 			const ret: any = getFromObject(data, current.variable)
-			console.log('IF', typeof ret, ret)
 			let isTrue: boolean = ret !== undefined && ret !== false && ret !== null && ret !== ''
 			if (current.inverted) isTrue = !isTrue
 
