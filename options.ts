@@ -4,18 +4,37 @@ export const enum LOG_TYPE {
 	Error,
 }
 
-export interface Render {
-	do: ((data: any) => string)
+export function isRender(obj: any): obj is Render {
+	return typeof obj === 'string'
+}
+
+export type Render = string
+export type Part = (PartFunction | Render)
+export type PartFunction = (data: any) => (Part[] | Render)
+
+export interface ActionReturn {
+	parts: Part[]
+	length: number
+}
+
+export type ActionFunction = (part: Render) => ActionReturn
+
+export interface Compiled {
+	template: Part[]
 	hash: string
 	time: number
 }
 
-export interface Error {
-	parse: string
-}
+export const error = {
+	parse: {
+		default: 'Parse Error.',
+		import_recursion: 'Maximal recusion achieved in import module',
+		not_supported: 'Not supported yet',
+		comment_not_closed: 'Comment was not closed properly',
+		variable_not_closed: 'Variable was not closed properly',
+		include_not_closed: 'Include not closed',
+	},
 
-export const error: Error = {
-	parse: 'Parse Error.'
 }
 
 interface Options {
@@ -33,8 +52,8 @@ export const options: Options = {
 	caching: true,
 	template_dir: './views',
 	template_ext: 'html',
-	compiled_dir: './views',
-	compiled_ext: 'htmlbin',
+	compiled_dir: './cache',
+	compiled_ext: 'bjs',
 	max_recursion: 100,
 }
 
@@ -45,8 +64,10 @@ interface Expressions {
 	incude: string
 	if: string
 	if_else: string
+	if_invert: string
 	for: string
 	for_in: string
+	closing_tag: string
 }
 
 export const re: Expressions = {
@@ -56,6 +77,8 @@ export const re: Expressions = {
 	incude: '>',
 	if: '?',
 	if_else: '!',
+	if_invert: '!',
 	for: '*',
 	for_in: 'in',
+	closing_tag: '/',
 }

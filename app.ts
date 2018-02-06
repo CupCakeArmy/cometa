@@ -1,11 +1,10 @@
-import * as fs from 'fs'
 import * as path from 'path'
 import * as util from './util'
 import * as parser from './parser'
-import { Render, LOG_TYPE, options } from './options'
-import { replaceVars, addParts } from './parser';
+import * as compiler from './compiler'
+import { Compiled, LOG_TYPE, options } from './options'
 
-const cache: Map<string, Render> = new Map()
+const cache: Map<string, Compiled> = new Map()
 
 function logger(type: LOG_TYPE, msg: object | string): void {
 	if (typeof msg === 'object')
@@ -28,47 +27,41 @@ function logger(type: LOG_TYPE, msg: object | string): void {
 	console.log(`${typeString}:`, msg)
 }
 
-async function compile(html: string): Promise<Render> {
-	html = await parser.insertImports(html)
-	html = parser.removeComments(html)
-
-	const compiled = replaceVars(html)
-
+async function compile(html: string): Promise<Compiled> {
 	return {
-		do(data) {
-			return addParts(data, compiled)
-		},
+		template: compiler.process(html),
 		hash: await util.checksum(html, true),
 		time: Date.now()
 	}
 }
 
-async function render(template_name: string, data?: any): Promise<string | undefined> {
-	const compiled_path = path.join(options.compiled_dir, `${template_name}.${options.compiled_ext}`)
+async function render(template_name: string, data?: any): Promise<string> {
+	// const compiled_path = path.join(options.compiled_dir, `${template_name}.${options.compiled_ext}`)
+	const template_path = path.join(options.template_dir, `${template_name}.${options.template_ext}`)
 
-	if (!options.caching || !await util.exists(compiled_path)) {
-		const template_path = path.join(options.template_dir, `${template_name}.${options.template_ext}`)
-
+	// Compile Template if is not in cache
+	if (options.caching && !cache.get(template_name)) {
 		const html = await util.readFile(template_path)
-		if (html === undefined) {
-			logger(LOG_TYPE.Error, 'No file found')
-			return
-		}
-		else
+		if (html !== undefined)
 			cache.set(template_name, await compile(html))
+		else {
+			logger(LOG_TYPE.Error, 'No file found')
+			return ''
+		}
 	}
 
-	const render = cache.get(template_name)
-	if (render) {
-		return render.do(data)
-	}
+	const compiled = cache.get(template_name)
+	if (compiled)
+		return parser.computeParts(compiled.template, data)
 	else
-		return
+		return ''
 }
 
 async function go() {
-	console.log(await render('test', {
-		title: 'title',
+	const ret = await render('new', {
+		test: true,
+		testa: true,
+		title: 'test',
 		body: {
 			p: [
 				'omg',
@@ -77,7 +70,9 @@ async function go() {
 				}
 			]
 		},
-	}))
+	})
+
+	ret.log()
 }
 
 go()
