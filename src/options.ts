@@ -68,6 +68,7 @@ interface Expressions {
 	for: string
 	for_in: string
 	closing_tag: string
+	valid_variable: string
 }
 
 export const re: Expressions = {
@@ -81,4 +82,5 @@ export const re: Expressions = {
 	for: '*',
 	for_in: 'in',
 	closing_tag: '/',
+	valid_variable: '[A-z](\\w|\\.)*?',
 }

@@ -2,8 +2,7 @@ import { compileBlock } from './compiler'
 import { ActionFunction, re, error, options, Part } from './options'
 import { getFromObject, readFileSync } from './util'
 import { join } from 'path'
-import 'colors'
-import { computeParts } from './parser';
+import { computeParts } from './parser'
 
 export const comment: ActionFunction = html => {
 
@@ -21,7 +20,7 @@ export const comment: ActionFunction = html => {
 export const logic: ActionFunction = html => {
 
 	const rexp = {
-		start: new RegExp(`${re.begin}\\${re.if} *\\${re.if_else}?[A-z]\\w*? *${re.ending}`, 'g'),
+		start: new RegExp(`${re.begin}\\${re.if} *\\${re.if_else}?${re.valid_variable} *${re.ending}`, 'g'),
 		else: new RegExp(`${re.begin} *\\${re.if_else} *${re.ending}`, 'g'),
 		end: RegExp(`${re.begin} *\\${re.closing_tag} *\\${re.if} *${re.ending}`, 'g'),
 	}
@@ -65,6 +64,7 @@ export const logic: ActionFunction = html => {
 	return {
 		parts: [(data: any) => {
 			const ret: any = getFromObject(data, current.variable)
+			console.log('IF', typeof ret, ret)
 			let isTrue: boolean = ret !== undefined && ret !== false && ret !== null && ret !== ''
 			if (current.inverted) isTrue = !isTrue
 
@@ -118,7 +118,7 @@ export const variables: ActionFunction = html => {
 export const loop: ActionFunction = html => {
 
 	const rexp = {
-		start: new RegExp(`${re.begin}\\${re.for} *([A-z]\\w*?) *${re.for_in} *([A-z]\\w*?) *${re.ending}`, 'g'),
+		start: new RegExp(`${re.begin}\\${re.for} *${re.valid_variable} *${re.for_in} *${re.valid_variable} *${re.ending}`, 'g'),
 		end: RegExp(`${re.begin} *\\${re.closing_tag} *\\${re.for} *${re.ending}`, 'g'),
 	}
 
