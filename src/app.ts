@@ -50,6 +50,7 @@ async function render(template_name: string, data?: any): Promise<string> {
 		}
 	}
 
+	// Render the template and return the html
 	const compiled = cache.get(template_name)
 	if (compiled)
 		return parser.computeParts(compiled.template, data)
@@ -59,17 +60,7 @@ async function render(template_name: string, data?: any): Promise<string> {
 
 async function go() {
 	const ret = await render('new', {
-		test: true,
-		testa: true,
-		title: 'test',
-		body: {
-			p: [
-				'omg',
-				{
-					check: 'let goo'
-				}
-			]
-		},
+		arr: [{ test: true }, { test: false }]
 	})
 
 	ret.log()
