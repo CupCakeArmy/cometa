@@ -21,7 +21,6 @@ export type ActionFunction = (part: Render) => ActionReturn
 
 export interface Compiled {
 	template: Part[]
-	hash: string
 	time: number
 }
 
