@@ -1,18 +1,19 @@
-import * as express from 'express'
-
+const express = require('express')
 const app = express()
 
 app.set('views', './views')
 app.set('view engine', 'blitz')
-app.engine('blitz', require('./src/blitz')._express)
+app.engine('blitz', require('cometa')._express)
 
 app.get('/', (req, res) => {
-	res.render('new', {
-		myVar: 'whuup whuup',
+	res.render('index', {
+		title: 'Cometa!',
 		arr: [{
-			test: true
+			show: true,
+			msg: 'Show meee',
 		}, {
-			test: false
+			show: false,
+			msg: 'I\'m hidden :(',
 		}],
 	})
 })
