@@ -1,5 +1,0 @@
-<ul>
-	{{* i in arr}}
-	<li>{{? i.test }} {{i}} {{/?}}</li>
-	{{/*}} {{# some comment #}} {{myVar}}
-</ul>
