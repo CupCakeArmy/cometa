@@ -1,16 +1,18 @@
 {
-  "name": "template",
+  "name": "cometa",
   "version": "1.0.0",
-  "description": "Templating Engine",
-  "main": "app.js",
-  "scripts": {},
+  "description": "Cometa Templating Engine",
   "keywords": [
     "Templating",
     "Engine"
   ],
+  "repository": {
+    "url": "https://github.com/CupCakeArmy/cometa",
+    "type": "github"
+  },
   "author": "Niccolo Borgioli",
   "license": "MIT",
-  "dependencies": {
-    "@types/node": "^9.4.0"
+  "devDependencies": {
+    "@types/node": "^9.4.1"
   }
 }
