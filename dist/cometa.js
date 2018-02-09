@@ -5,43 +5,42 @@ const util = require("./util");
 const parser = require("./parser");
 const compiler = require("./compiler");
 const options_1 = require("./options");
-const cache = new Map();
-function compile(html) {
-    return {
-        template: compiler.process(html),
-        time: Date.now()
-    };
-}
-function renderFile(file, data, callback) {
-    util.readFile(file).then(html => {
-        util.checksum(html, true).then(hash => {
-            if (options_1.options.caching && !cache.get(html))
-                cache.set(html, compile(html));
-            const compiled = cache.get(html);
-            if (compiled)
-                callback(null, parser.computeParts(compiled.template, data));
-            else
-                callback('Error: Chache not found', '');
-        });
-    });
-}
-exports.renderFile = renderFile;
-async function render(template_name, data) {
-    const template_path = path.join(options_1.options.template_dir, `${template_name}.${options_1.options.template_ext}`);
-    if (options_1.options.caching && !cache.get(template_name)) {
-        const html = await util.readFile(template_path);
-        if (html !== undefined)
-            cache.set(template_name, compile(html));
-        else {
-            'No file found'.log();
-            return '';
-        }
+module.exports = class {
+    constructor(opt, rexp) {
+        this.options = options_1.options;
+        this.expressions = options_1.re;
+        this._express = this.renderFile;
+        this.cache = new Map();
+        this.options = Object.assign(this.options, opt);
+        this.expressions = Object.assign(this.expressions, rexp);
+        if (module.parent === null)
+            throw new Error('Not imported');
+        this.options.views = path.join(path.dirname(module.parent.filename), this.options.views);
     }
-    const compiled = cache.get(template_name);
-    if (compiled)
-        return parser.computeParts(compiled.template, data);
-    else
-        return '';
-}
-exports.render = render;
-exports._express = renderFile;
+    renderFile(file, data, callback) {
+        console.log('Options', this.options);
+        util.readFile(file).then(html => {
+            console.log('Options', this.options);
+            if (html === undefined) {
+                callback(`No template found: ${file}`, '');
+                return;
+            }
+            util.checksum(html, true).then(hash => {
+                if (this.options.caching && !this.cache.get(html))
+                    this.cache.set(html, {
+                        template: compiler.process(html, this.options, this.expressions),
+                        time: Date.now()
+                    });
+                const compiled = this.cache.get(html);
+                if (compiled)
+                    callback(null, parser.computeParts(compiled.template, data));
+                else
+                    callback('Error: Chache not found', '');
+            });
+        });
+    }
+    renderTemplate(template_name, data, callback) {
+        const template_path = path.join(this.options.views, `${template_name}.${this.options.extension}`);
+        this.renderFile(template_path, data, callback);
+    }
+};

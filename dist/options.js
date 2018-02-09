@@ -17,11 +17,8 @@ exports.error = {
 exports.options = {
     encoding: 'utf-8',
     caching: true,
-    template_dir: './views',
-    template_ext: 'html',
-    compiled_dir: './cache',
-    compiled_ext: 'bjs',
-    max_recursion: 100,
+    views: './views',
+    extension: 'html',
 };
 exports.re = {
     begin: '{{',

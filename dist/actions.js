@@ -5,8 +5,8 @@ const options_1 = require("./options");
 const util_1 = require("./util");
 const path_1 = require("path");
 const parser_1 = require("./parser");
-exports.comment = html => {
-    const tag = options_1.re.comment + options_1.re.ending;
+exports.comment = (html, options, re) => {
+    const tag = re.comment + re.ending;
     const end = html.indexOf(tag);
     if (end === -1)
         throw new Error(options_1.error.parse.comment_not_closed);
@@ -15,11 +15,11 @@ exports.comment = html => {
         length: end + tag.length
     };
 };
-exports.logic = html => {
+exports.logic = (html, options, re) => {
     const rexp = {
-        start: new RegExp(`${options_1.re.begin}\\${options_1.re.if} *\\${options_1.re.if_else}?${options_1.re.valid_variable} *${options_1.re.ending}`, 'g'),
-        else: new RegExp(`${options_1.re.begin} *\\${options_1.re.if_else} *${options_1.re.ending}`, 'g'),
-        end: RegExp(`${options_1.re.begin} *\\${options_1.re.closing_tag} *\\${options_1.re.if} *${options_1.re.ending}`, 'g'),
+        start: new RegExp(`${re.begin}\\${re.if} *\\${re.if_else}?${re.valid_variable} *${re.ending}`, 'g'),
+        else: new RegExp(`${re.begin} *\\${re.if_else} *${re.ending}`, 'g'),
+        end: RegExp(`${re.begin} *\\${re.closing_tag} *\\${re.if} *${re.ending}`, 'g'),
     };
     const current = {
         found: rexp.start.exec(html),
@@ -28,10 +28,10 @@ exports.logic = html => {
     };
     if (current.found === null || current.found.index !== 0)
         throw new Error(options_1.error.parse.default);
-    current.variable = current.found[0].slice(options_1.re.begin.length + options_1.re.if.length, -options_1.re.ending.length).trim();
-    current.inverted = current.variable[0] === options_1.re.if_invert;
+    current.variable = current.found[0].slice(re.begin.length + re.if.length, -re.ending.length).trim();
+    current.inverted = current.variable[0] === re.if_invert;
     if (current.inverted)
-        current.variable = current.variable.slice(options_1.re.if_invert.length);
+        current.variable = current.variable.slice(re.if_invert.length);
     let next;
     do {
         next = {
@@ -53,30 +53,30 @@ exports.logic = html => {
                 if (current.inverted)
                     isTrue = !isTrue;
                 if (isTrue)
-                    return compiler_1.compileBlock(body.if).parts;
+                    return compiler_1.compileBlock(body.if, options, re).parts;
                 else
-                    return compiler_1.compileBlock(body.else).parts;
+                    return compiler_1.compileBlock(body.else, options, re).parts;
             }],
         length: next.end.index + next.end[0].length
     };
 };
-exports.importer = html => {
-    const end = html.indexOf(options_1.re.ending);
+exports.importer = (html, options, re) => {
+    const end = html.indexOf(re.ending);
     if (end === -1)
         throw new Error(options_1.error.parse.include_not_closed);
-    const template_name = html.substring(options_1.re.begin.length + options_1.re.incude.length, end).trim();
-    const file_name = path_1.join(options_1.options.template_dir, `${template_name}.${options_1.options.template_ext}`);
+    const template_name = html.substring(re.begin.length + re.incude.length, end).trim();
+    const file_name = path_1.join(options.views, `${template_name}.${options.extension}`);
     const file = util_1.readFileSync(file_name);
     return {
-        parts: compiler_1.compileBlock(file).parts,
-        length: end + options_1.re.ending.length
+        parts: compiler_1.compileBlock(file, options, re).parts,
+        length: end + re.ending.length
     };
 };
-exports.variables = html => {
-    const end = html.indexOf(options_1.re.ending);
+exports.variables = (html, options, re) => {
+    const end = html.indexOf(re.ending);
     if (end === -1)
         throw new Error(options_1.error.parse.variable_not_closed);
-    const variable_name = html.substring(options_1.re.begin.length, end).trim();
+    const variable_name = html.substring(re.begin.length, end).trim();
     return {
         parts: [(data) => {
                 const output = util_1.getFromObject(data, variable_name);
@@ -87,13 +87,13 @@ exports.variables = html => {
                         return output;
                 }
             }],
-        length: end + options_1.re.ending.length
+        length: end + re.ending.length
     };
 };
-exports.loop = html => {
+exports.loop = (html, options, re) => {
     const rexp = {
-        start: new RegExp(`${options_1.re.begin}\\${options_1.re.for} *${options_1.re.valid_variable} *${options_1.re.for_in} *${options_1.re.valid_variable} *${options_1.re.ending}`, 'g'),
-        end: RegExp(`${options_1.re.begin} *\\${options_1.re.closing_tag} *\\${options_1.re.for} *${options_1.re.ending}`, 'g'),
+        start: new RegExp(`${re.begin}\\${re.for} *${re.valid_variable} *${re.for_in} *${re.valid_variable} *${re.ending}`, 'g'),
+        end: RegExp(`${re.begin} *\\${re.closing_tag} *\\${re.for} *${re.ending}`, 'g'),
     };
     const current = {
         found: rexp.start.exec(html),
@@ -102,7 +102,7 @@ exports.loop = html => {
     };
     if (current.found === null || current.found.index !== 0)
         throw new Error(options_1.error.parse.default);
-    const statement = current.found[0].slice(options_1.re.begin.length + options_1.re.if.length, -options_1.re.ending.length).trim().split(options_1.re.for_in);
+    const statement = current.found[0].slice(re.begin.length + re.if.length, -re.ending.length).trim().split(re.for_in);
     current.variable = statement[0].trim();
     current.arr = statement[1].trim();
     let next;
@@ -120,7 +120,7 @@ exports.loop = html => {
                 let ret = '';
                 for (const variable of util_1.getFromObject(data, current.arr)) {
                     const newData = Object.assign({ [current.variable]: variable }, data);
-                    ret += parser_1.computeParts(compiler_1.compileBlock(html).parts, newData);
+                    ret += parser_1.computeParts(compiler_1.compileBlock(html, options, re).parts, newData);
                 }
                 return ret;
             }],

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const options_1 = require("./options");
 function computeParts(parts, data = {}) {
-    if (parts.length === 0)
+    if (parts === undefined || parts.length === 0)
         return '';
     return computePart(parts[0], data) + computeParts(parts.slice(1), data);
 }

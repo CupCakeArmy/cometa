@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const options_1 = require("./options");
 const actions = require("./actions");
-const rexp = Object.freeze({
-    begin: new RegExp(options_1.re.begin, 'g'),
-    end: new RegExp(options_1.re.ending, 'g'),
-});
-exports.compileBlock = part => {
+exports.compileBlock = (part, optoins, re) => {
+    const rexp = Object.freeze({
+        begin: new RegExp(re.begin, 'g'),
+        end: new RegExp(re.ending, 'g'),
+    });
     let next;
     const getNext = (s) => Object.freeze({
         start: s.search(rexp.begin),
@@ -26,24 +26,24 @@ exports.compileBlock = part => {
         addToRet(part.substr(0, next.start));
         part = part.slice(next.start);
         let func;
-        switch (part[options_1.re.begin.length]) {
-            case options_1.re.comment:
+        switch (part[re.begin.length]) {
+            case re.comment:
                 func = actions.comment;
                 break;
-            case options_1.re.if:
+            case re.if:
                 func = actions.logic;
                 break;
-            case options_1.re.for:
+            case re.for:
                 func = actions.loop;
                 break;
-            case options_1.re.incude:
+            case re.incude:
                 func = actions.importer;
                 break;
             default:
                 func = actions.variables;
                 break;
         }
-        const result = func(part);
+        const result = func(part, options_1.options, re);
         addToRet(result.parts);
         part = part.slice(result.length);
         next = getNext(part);
@@ -51,8 +51,8 @@ exports.compileBlock = part => {
     addToRet(part);
     return ret;
 };
-function process(html, options = {}) {
-    const parts = exports.compileBlock(html).parts;
+function process(html, options, re) {
+    const parts = exports.compileBlock(html, options, re).parts;
     return parts;
 }
 exports.process = process;
