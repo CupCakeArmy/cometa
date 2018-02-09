@@ -1,9 +1,10 @@
 const express = require('express')
 const app = express()
+const Cometa = require('../../dist/cometa')
 
 app.set('views', './views')
-app.set('view engine', 'blitz')
-app.engine('blitz', require('cometa')._express)
+app.set('view engine', 'html')
+app.engine('html', new Cometa()._express)
 
 app.get('/', (req, res) => {
 	res.render('index', {
