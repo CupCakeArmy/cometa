@@ -17,7 +17,7 @@ export interface ActionReturn {
 	length: number
 }
 
-export type ActionFunction = (part: Render) => ActionReturn
+export type ActionFunction = (part: Render, options: Options, re: Expressions) => ActionReturn
 
 export interface Compiled {
 	template: Part[]
@@ -36,27 +36,21 @@ export const error = {
 
 }
 
-interface Options {
+export interface Options {
 	encoding: string
 	caching: boolean
-	template_dir: string
-	template_ext: string
-	compiled_dir: string
-	compiled_ext: string
-	max_recursion: number
+	views: string
+	extension: string
 }
 
 export const options: Options = {
 	encoding: 'utf-8',
 	caching: true,
-	template_dir: './views',
-	template_ext: 'html',
-	compiled_dir: './cache',
-	compiled_ext: 'bjs',
-	max_recursion: 100,
+	views: './views',
+	extension: 'html',
 }
 
-interface Expressions {
+export interface Expressions {
 	begin: string
 	ending: string
 	comment: string

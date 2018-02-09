@@ -1,12 +1,13 @@
-import { Part, re, error, ActionFunction, ActionReturn } from './options'
+import { Part, error, ActionFunction, ActionReturn, options, Options, Expressions } from './options'
 import * as actions from './actions'
 
-const rexp = Object.freeze({
-	begin: new RegExp(re.begin, 'g'),
-	end: new RegExp(re.ending, 'g'),
-})
+export const compileBlock: ActionFunction = (part, optoins, re) => {
 
-export const compileBlock: ActionFunction = part => {
+	const rexp = Object.freeze({
+		begin: new RegExp(re.begin, 'g'),
+		end: new RegExp(re.ending, 'g'),
+	})
+
 	interface Next {
 		start: number
 		end: number
@@ -56,7 +57,7 @@ export const compileBlock: ActionFunction = part => {
 				break
 		}
 
-		const result = func(part)
+		const result = func(part, options, re)
 		addToRet(result.parts)
 		part = part.slice(result.length)
 
@@ -68,8 +69,8 @@ export const compileBlock: ActionFunction = part => {
 	return ret
 }
 
-export function process(html: string, options = {}): Part[] {
-	const parts: Part[] = compileBlock(html).parts
+export function process(html: string, options: Options, re: Expressions): Part[] {
+	const parts: Part[] = compileBlock(html, options, re).parts
 	return parts
 
 }

@@ -2,7 +2,7 @@ import { Part, Render, isRender, PartFunction } from "./options";
 
 
 export function computeParts(parts: Part[], data = {}): Render {
-	if (parts.length === 0)
+	if (parts === undefined || parts.length === 0)
 		return ''
 
 	return computePart(parts[0], data) + computeParts(parts.slice(1), data)

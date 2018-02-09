@@ -1,10 +1,10 @@
 import { compileBlock } from './compiler'
-import { ActionFunction, re, error, options, Part } from './options'
+import { ActionFunction, error, Part } from './options'
 import { getFromObject, readFileSync } from './util'
 import { join } from 'path'
 import { computeParts } from './parser'
 
-export const comment: ActionFunction = html => {
+export const comment: ActionFunction = (html, options, re) => {
 
 	const tag = re.comment + re.ending
 	const end = html.indexOf(tag)
@@ -17,7 +17,7 @@ export const comment: ActionFunction = html => {
 	}
 }
 
-export const logic: ActionFunction = html => {
+export const logic: ActionFunction = (html, options, re) => {
 
 	const rexp = {
 		start: new RegExp(`${re.begin}\\${re.if} *\\${re.if_else}?${re.valid_variable} *${re.ending}`, 'g'),
@@ -68,31 +68,31 @@ export const logic: ActionFunction = html => {
 			if (current.inverted) isTrue = !isTrue
 
 			if (isTrue)
-				return compileBlock(body.if).parts
+				return compileBlock(body.if, options, re).parts
 			else
-				return compileBlock(body.else).parts
+				return compileBlock(body.else, options, re).parts
 		}],
 		length: next.end.index + next.end[0].length
 	}
 }
 
-export const importer: ActionFunction = html => {
+export const importer: ActionFunction = (html, options, re) => {
 
 	const end = html.indexOf(re.ending)
 
 	if (end === -1) throw new Error(error.parse.include_not_closed)
 
 	const template_name: string = html.substring(re.begin.length + re.incude.length, end).trim()
-	const file_name: string = join(options.template_dir, `${template_name}.${options.template_ext}`)
+	const file_name: string = join(options.views, `${template_name}.${options.extension}`)
 	const file: Part = readFileSync(file_name)
 
 	return {
-		parts: compileBlock(file).parts,
+		parts: compileBlock(file, options, re).parts,
 		length: end + re.ending.length
 	}
 }
 
-export const variables: ActionFunction = html => {
+export const variables: ActionFunction = (html, options, re) => {
 
 	const end = html.indexOf(re.ending)
 
@@ -114,7 +114,7 @@ export const variables: ActionFunction = html => {
 	}
 }
 
-export const loop: ActionFunction = html => {
+export const loop: ActionFunction = (html, options, re) => {
 
 	const rexp = {
 		start: new RegExp(`${re.begin}\\${re.for} *${re.valid_variable} *${re.for_in} *${re.valid_variable} *${re.ending}`, 'g'),
@@ -156,7 +156,7 @@ export const loop: ActionFunction = html => {
 			let ret = ''
 			for (const variable of getFromObject(data, current.arr)) {
 				const newData = Object.assign({ [current.variable]: variable }, data)
-				ret += computeParts(compileBlock(html).parts, newData)
+				ret += computeParts(compileBlock(html, options, re).parts, newData)
 			}
 			return ret
 		}],
