@@ -4,16 +4,25 @@ import * as parser from './parser'
 import * as compiler from './compiler'
 import { Compiled, options, Options, Expressions, re } from './options'
 
-module.exports = class {
-	private cache: Map<string, Compiled>
-	private options: Options = options
-	private expressions: Expressions = re
+type RenderCallback = (err: any, render: string) => void
+
+interface Env {
+	options: Options
+	expressions: Expressions
+	cache: Map<string, Compiled>
+}
+
+module.exports = class Cometa {
+	cache: Map<string, Compiled> = new Map()
+	options: Options
+	expressions: Expressions
+
+	private static permCache: Map<string, Compiled>
 
 	constructor(opt?: Options, rexp?: Expressions) {
-		this.cache = new Map()
 
-		this.options = Object.assign(this.options, opt)
-		this.expressions = Object.assign(this.expressions, rexp)
+		this.options = Object.assign(options, opt)
+		this.expressions = Object.assign(re, rexp)
 
 		if (module.parent === null)
 			throw new Error('Not imported')
@@ -21,24 +30,24 @@ module.exports = class {
 		this.options.views = path.join(path.dirname(module.parent.filename), this.options.views)
 	}
 
-	renderFile(file: string, data: any, callback: (err: any, render: string) => void): void {
-		console.log('Options', this.options)
+	private static exec(file: string, data: any, callback: RenderCallback, env: Env): void {
 		util.readFile(file).then(html => {
-			console.log('Options', this.options)
 			if (html === undefined) {
 				callback(`No template found: ${file}`, '')
 				return
 			}
 			util.checksum(html, true).then(hash => {
 				// Compile Template if is not in cache
-				if (this.options.caching && !this.cache.get(html))
-					this.cache.set(html, {
-						template: compiler.process(html, this.options, this.expressions),
+				if (env.options.caching && !env.cache.get(html)) {
+					process.stdout.write(`Compiling: ${hash}\n`)
+					env.cache.set(html, {
+						template: compiler.process(html, env.options, env.expressions),
 						time: Date.now()
 					})
+				}
 
 				// Render the template and return the html
-				const compiled = this.cache.get(html)
+				const compiled = env.cache.get(html)
 				if (compiled)
 					callback(null, parser.computeParts(compiled.template, data))
 				else
@@ -47,11 +56,30 @@ module.exports = class {
 		})
 	}
 
-	renderTemplate(template_name: string, data: any, callback: (err: any, render: string) => void): void {
+	render(template_name: string, data: any, callback: RenderCallback): void {
 		const template_path = path.join(this.options.views, `${template_name}.${this.options.extension}`)
 		this.renderFile(template_path, data, callback)
 	}
 
-	_express = this.renderFile
+	renderFile(template_path: string, data: any, callback: RenderCallback): void {
+		Cometa.exec(template_path, data, callback, {
+			options: this.options,
+			expressions: this.expressions,
+			cache: this.cache
+		})
+	}
+
+	static __express(file: string, data: any, callback: RenderCallback) {
+		if (Cometa.permCache === undefined) {
+			process.stdout.write('Initializing cache map\n')
+			Cometa.permCache = new Map()
+		}
+
+		Cometa.exec(file, data, callback, {
+			options: options,
+			expressions: re,
+			cache: Cometa.permCache,
+		})
+	}
 
 }
