@@ -1,6 +1,9 @@
 const Cometa = require('../../dist/cometa.js')
+
+// Initialize
 const cometa = new Cometa()
 
+// Data
 const template = 'index'
 const data = {
 	name: 'World'
@@ -12,4 +15,5 @@ const callback = (err, html) => {
 		console.log(html)
 }
 
-cometa.renderTemplate(template, data, callback)
+// Do the render
+cometa.render(template, data, callback)
