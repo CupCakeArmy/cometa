@@ -107,7 +107,7 @@ export const variables: ActionFunction = (html, options, re) => {
 				case 'object':
 					return JSON.stringify(output)
 				default:
-					return output
+					return String(output)
 			}
 		}],
 		length: end + re.ending.length
