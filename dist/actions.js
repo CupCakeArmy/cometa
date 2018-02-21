@@ -84,7 +84,7 @@ exports.variables = (html, options, re) => {
                     case 'object':
                         return JSON.stringify(output);
                     default:
-                        return output;
+                        return String(output);
                 }
             }],
         length: end + re.ending.length
@@ -102,9 +102,11 @@ exports.loop = (html, options, re) => {
     };
     if (current.found === null || current.found.index !== 0)
         throw new Error(options_1.error.parse.default);
-    const statement = current.found[0].slice(re.begin.length + re.if.length, -re.ending.length).trim().split(re.for_in);
-    current.variable = statement[0].trim();
-    current.arr = statement[1].trim();
+    const statement = current.found[0]
+        .slice(re.begin.length + re.if.length, -re.ending.length).trim()
+        .split(new RegExp(` +${re.for_in} +`, 'g'));
+    current.variable = statement[0];
+    current.arr = statement[1];
     let next;
     do {
         next = {
@@ -115,14 +117,20 @@ exports.loop = (html, options, re) => {
             throw new Error(options_1.error.parse.default);
     } while (next.start !== null && next.start.index < next.end.index);
     html = html.substring(current.found[0].length, next.end.index);
+    const content = compiler_1.compileBlock(html, options, re);
     return {
         parts: [(data) => {
-                let ret = '';
-                for (const variable of util_1.getFromObject(data, current.arr)) {
-                    const newData = Object.assign({ [current.variable]: variable }, data);
-                    ret += parser_1.computeParts(compiler_1.compileBlock(html, options, re).parts, newData);
+                const it = util_1.getFromObject(data, current.arr);
+                if (!(Symbol.iterator in Object(it)))
+                    return '';
+                else {
+                    let ret = '';
+                    for (const variable of it) {
+                        const newData = Object.assign({ [current.variable]: variable }, data);
+                        ret += parser_1.computeParts(content.parts, newData);
+                    }
+                    return ret;
                 }
-                return ret;
             }],
         length: next.end.index + next.end[0].length
     };
