@@ -14,6 +14,13 @@ app.get('/', (req, res) => {
 		}, {
 			show: false,
 			msg: 'I\'m hidden :(',
+		}, {
+			show: true,
+			msg: 'I\'m super',
+			comments: [
+				'Amazing!',
+				'No way?'
+			]
 		}],
 	})
 })

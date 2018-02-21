@@ -6,11 +6,25 @@
 
 	<h1>{{title}}</h1>
 
+	{{# Ignore Me! #}}
+
 	<ul>
 		{{* i in arr}}
 
 			{{? i.show }}
-				<li>{{i.msg}}</li>
+				<li>
+					{{i.msg}}
+
+					{{? i.comments}}
+						<ul>
+
+						{{* comment in i.comments}}
+							<li>{{comment}}</li>
+						{{/*}}
+
+						</ul>
+					{{/?}}
+				</li>
 			{{/?}}
 			
 		{{/*}}
