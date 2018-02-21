@@ -50,7 +50,7 @@ npm i cometa
 ### Variable
 
 ```json
-{myVar: "ok"}
+{"myVar": "ok"}
 ```
 
 ```html
@@ -75,7 +75,12 @@ True is everything that is different from:
 - `''`
 
 ```json
-{ myVar: 'something'|true|[1,2,3]|42|...}
+{
+	"myVar": "something",
+	"myVar": true,
+	"myVar": [1,2,3],
+	"myVar": 42,
+}
 ```
 
 ```html
@@ -88,10 +93,10 @@ True is everything that is different from:
 
 ```json
 {
-	links: [
-		{id:0, name: "One"},
-		{id:1, name: "Two"},
-		{id:2, name: "Three"}
+	"links": [
+		{"id":0, "name": "One"},
+		{"id":1, "name": "Two"},
+		{"id":2, "name": "Three"}
 	]
 }
 ```
