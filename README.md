@@ -1,5 +1,7 @@
 # Cometa
 
+[![Build Status](https://travis-ci.org/CupCakeArmy/cometa.svg?branch=master)](https://travis-ci.org/CupCakeArmy/cometa)
+
 > Yet another templating engine 📠
 
 Cometa is a templating engine with **no dependencies** written in `JS`. That was the reason because it was created.
