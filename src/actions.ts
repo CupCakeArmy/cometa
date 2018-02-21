@@ -154,14 +154,21 @@ export const loop: ActionFunction = (html, options, re) => {
 
 	html = html.substring(current.found[0].length, next.end.index)
 
+	const content = compileBlock(html, options, re)
+
 	return {
 		parts: [(data: any) => {
-			let ret = ''
-			for (const variable of getFromObject(data, current.arr)) {
-				const newData = Object.assign({ [current.variable]: variable }, data)
-				ret += computeParts(compileBlock(html, options, re).parts, newData)
+			const it = getFromObject(data, current.arr)
+			if (!(Symbol.iterator in Object(it)))
+				return ''
+			else {
+				let ret = ''
+				for (const variable of it) {
+					const newData = Object.assign({ [current.variable]: variable }, data)
+					ret += computeParts(content.parts, newData)
+				}
+				return ret
 			}
-			return ret
 		}],
 		length: next.end.index + next.end[0].length
 	}
