@@ -133,9 +133,12 @@ export const loop: ActionFunction = (html, options, re) => {
 		throw new Error(error.parse.default)
 
 	// Extract variable name from the if statemtent
-	const statement = current.found[0].slice(re.begin.length + re.if.length, -re.ending.length).trim().split(re.for_in)
-	current.variable = statement[0].trim()
-	current.arr = statement[1].trim()
+	const statement = current.found[0]
+		.slice(re.begin.length + re.if.length, -re.ending.length).trim()
+		.split(new RegExp(` +${re.for_in} +`, 'g'))
+
+	current.variable = statement[0]
+	current.arr = statement[1]
 
 	let next
 	do {
