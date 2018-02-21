@@ -10,9 +10,13 @@
     "url": "https://github.com/CupCakeArmy/cometa",
     "type": "github"
   },
+  "scripts": {
+    "test": "mocha"
+  },
   "author": "Niccolo Borgioli",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^9.4.1"
+    "@types/node": "^9.4.6",
+    "mocha": "^5.0.1"
   }
 }
