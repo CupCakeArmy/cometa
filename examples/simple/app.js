@@ -1,4 +1,4 @@
-const Cometa = require('../../dist/cometa.js')
+const Cometa = require('cometa')
 
 // Initialize
 const cometa = new Cometa()

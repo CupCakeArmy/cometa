@@ -3,7 +3,7 @@ const app = express()
 
 app.set('views', `${__dirname}/views`)
 app.set('view engine', 'html')
-app.engine('html', require('../../dist/cometa').__express)
+app.engine('html', require('cometa').__express)
 
 app.get('/', (req, res) => {
 	res.render('index', {
