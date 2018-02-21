@@ -75,5 +75,5 @@ export const re: Expressions = {
 	for: '*',
 	for_in: 'in',
 	closing_tag: '/',
-	valid_variable: '[A-z](\\w|\\.)*?',
+	valid_variable: '[A-z](\\w|\\.|\\[|\\])*?',
 }
