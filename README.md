@@ -4,16 +4,19 @@
 
 > Yet another templating engine 📠
 
-Cometa is a templating engine with **no dependencies** written in `JS`. That was the reason because it was created.
+Cometa is a templating engine with **no dependencies** written in `JS`. That was the reason it was created.
 
 ## Quickstart 💥
 
 ```bash
+# Go to examples
+cd examples/simple
+
 # Install
-npm i cometa
+npm i
 
 # Run
-node examples/simple/app.js
+node app.js
 ```
 
 ## Setup 🏗
@@ -46,6 +49,10 @@ new Cometa({
 ```bash
 npm i cometa
 ```
+
+## Run 🚀
+
+
 
 ## Reference 📒
 
