@@ -52,7 +52,81 @@ npm i cometa
 
 ## Run 🚀
 
+### Constructor Options
 
+```javascript
+new Cometa(options, expressions)
+```
+
+All options and expressions are **optional**.
+
+- `options` (`default`) description
+
+#### Options
+
+- `views` (`./views`) Root template folder
+- `extension` (`html`) File extension of the templates
+- `encoding` (`utf-8`) Encoding of the files
+
+#### Expressions
+
+- `begin` (`{{`) Opening tags
+- `ending` (`}}`) Closing tags
+- `comment` (`#`) Comment char
+- `incude` (`>`) Include char
+- `if` (`?`) If statement char
+- `if_invert` (`!`) Invert the variable in if statement
+- `for` (`*`) For char
+- `for_in` (`in`) Divider between array and i
+- `closing_tag` (`/`) Closing tag for ifs and loops
+
+### Render template
+
+```javascript
+const Cometa = require('cometa')
+const cometa = new Cometa()
+
+// Data
+const template = 'index' // file called index.html in ./views
+const data = {name: 'World'}
+const callback = (err, html) => console.log(html)
+
+// Do the render
+cometa.render(template, data, callback)
+```
+
+### Render file
+
+```javascript
+const Cometa = require('cometa')
+const cometa = new Cometa()
+
+// Data
+const data = {name: 'World'}
+const callback = (err, html) => console.log(html)
+
+// Do the render
+cometa.renderFile('myDir/myTemplate.myExtesion', data, callback)
+```
+
+### Express
+
+```javascript
+const express = require('express')
+const app = express()
+
+app.set('views', `${__dirname}/views`)
+app.set('view engine', 'html')
+app.engine('html', require('cometa').__express)
+
+app.get('/', (req, res) => {
+	res.render('index', {
+		title: 'Cometa!'
+	})
+})
+
+app.listen(3000, () => console.log('Example app listening on port 3000!'))
+```
 
 ## Reference 📒
 
