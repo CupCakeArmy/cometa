@@ -23,25 +23,14 @@ node app.js
 
 ### General Import
 
+[Constructor Options](#constructor-options)
+
 ```javascript
 // Import
 const Cometa = require('cometa')
 
 // Initialize
 const cometa = new Cometa()
-```
-
-### Constructor parameters
-
-- `views` [Optional] Root template folder
-- `extension` [Optional] File extension for the templates
-- `encoding` [Optional] Encoding to be used on the
-
-```javascript
-new Cometa({
-	views: './my/views/folder',
-	extension: 'html'
-})
 ```
 
 ## Installation 🚂
@@ -62,6 +51,17 @@ All options and expressions are **optional**.
 
 - `options` (`default`) description
 
+###### Example
+
+```javascript
+new Cometa({
+	views: './someDir'
+}, {
+	begin: '<<',
+	comment: '^'
+})
+```
+
 #### Options
 
 - `views` (`./views`) Root template folder
@@ -73,7 +73,7 @@ All options and expressions are **optional**.
 - `begin` (`{{`) Opening tags
 - `ending` (`}}`) Closing tags
 - `comment` (`#`) Comment char
-- `incude` (`>`) Include char
+- `inlcude` (`>`) Include char
 - `if` (`?`) If statement char
 - `if_invert` (`!`) Invert the variable in if statement
 - `for` (`*`) For char
